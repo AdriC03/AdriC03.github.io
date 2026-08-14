@@ -365,7 +365,11 @@ body.ready .ch{transform:none;opacity:1}
 .marquee-track{display:flex;gap:56px;width:max-content;animation:slide 34s linear infinite;will-change:transform}
 .marquee.rev .marquee-track{animation-direction:reverse;animation-duration:42s}
 .marquee:hover .marquee-track{animation-play-state:paused}
-@keyframes slide{to{transform:translateX(-50%)}}
+/* --sk lo escribe la velocidad del scroll */
+@keyframes slide{
+  from{transform:translateX(0) skewX(var(--sk,0deg))}
+  to{transform:translateX(-50%) skewX(var(--sk,0deg))}
+}
 .mq-item{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.02rem;color:var(--txt-dim);letter-spacing:-.01em;white-space:nowrap;transition:color .2s,transform .2s}
 .mq-item:hover{color:var(--cyan);transform:scale(1.12)}
 .mq-item::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--blue);opacity:.6}
@@ -676,9 +680,72 @@ footer{border-top:1px solid var(--line);padding:34px 0;position:relative;z-index
 .rv{opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
 .rv.in{opacity:1;transform:none}
 
+/* ============================================================
+   EXTRA 1 · borde de luz giratorio en las tarjetas
+   ============================================================ */
+@property --ang{syntax:"<angle>";initial-value:0deg;inherits:false}
+.brd{
+  position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;
+  opacity:0;transition:opacity .45s ease;padding:1.5px;
+  background:conic-gradient(from var(--ang),transparent 0 58%,var(--cyan) 76%,var(--violet) 88%,transparent 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+}
+.card:hover .brd{opacity:1;animation:spinAng 3.2s linear infinite}
+@keyframes spinAng{to{--ang:360deg}}
+
+/* ============================================================
+   EXTRA 2 · navegador de secciones (puntos laterales)
+   ============================================================ */
+#dots{
+  position:fixed;right:22px;top:50%;transform:translateY(-50%);
+  z-index:105;display:flex;flex-direction:column;gap:16px;
+  opacity:0;transition:opacity .5s ease;
+}
+#dots.on{opacity:1}
+.nd{position:relative;width:10px;height:10px;border-radius:50%;cursor:pointer;border:none;padding:0;
+  background:rgba(255,255,255,.2);transition:.4s var(--ease)}
+.nd::after{
+  content:attr(data-l);position:absolute;right:20px;top:50%;transform:translateY(-50%) translateX(6px);
+  font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-soft);
+  background:rgba(9,14,30,.9);border:1px solid var(--line);border-radius:8px;padding:5px 10px;
+  white-space:nowrap;opacity:0;pointer-events:none;transition:.3s var(--ease);
+}
+.nd:hover{background:var(--cyan);transform:scale(1.35)}
+.nd:hover::after{opacity:1;transform:translateY(-50%)}
+.nd.on{background:linear-gradient(135deg,var(--blue),var(--cyan));height:26px;border-radius:99px;box-shadow:0 0 14px rgba(34,211,238,.6)}
+@media(max-width:1100px){#dots{display:none}}
+
+/* ============================================================
+   EXTRA 3 · texto que entra palabra a palabra
+   ============================================================ */
+.w{display:inline-block;opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s var(--ease)}
+.rv.in .w{opacity:1;transform:none}
+
+/* ============================================================
+   EXTRA 4 · foco de luz del fondo que sigue al ratón
+   ============================================================ */
+#spot{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(460px circle at var(--sx,50%) var(--sy,30%),rgba(59,130,246,.09),transparent 62%);
+  transition:opacity .5s;
+}
+
+/* ============================================================
+   EXTRA 5 · estela del cursor
+   ============================================================ */
+.trail{
+  position:fixed;top:0;left:0;z-index:899;pointer-events:none;border-radius:50%;
+  width:6px;height:6px;margin:-3px 0 0 -3px;background:var(--cyan);opacity:0;
+}
+body.has-cursor .trail{opacity:.5}
+
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  .rv,.ch,.hero-el,.tl-item,.pill,.why,.contact-line{opacity:1!important;transform:none!important}
+  .rv,.ch,.hero-el,.tl-item,.pill,.why,.contact-line,.w{opacity:1!important;transform:none!important}
+  #spot,.trail,.brd{display:none}
   h2.title{clip-path:none!important}
   html{scroll-behavior:auto}
   #pre{display:none}
@@ -704,6 +771,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;position:relative;z-index
 <div class="cur-dot" id="curDot"></div>
 
 <!-- ambient -->
+<div id="spot"></div>
 <div class="bg-layer">
   <div class="bg-grid"></div>
   <div class="orb orb-1"></div>
@@ -715,6 +783,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;position:relative;z-index
 <div class="noise"></div>
 
 <div id="progress"></div>
+<div id="dots"></div>
 
 <!-- ============ NAV ============ -->
 <header class="nav" id="nav">
@@ -1029,7 +1098,7 @@ const fine   = matchMedia("(hover:hover) and (pointer:fine)").matches;
    ============================================================ */
 const PROJECTS = [
   {
-    f:["backend","data"], icon:"🗄️", metric:"Esquema relacional completo",
+    f:["backend","data"], icon:"🗄️", year:"2026", metric:"Esquema relacional completo",
     title:"Plataforma de venta online con base de datos relacional",
     sub:"PHP · MySQL · Diseño de esquema · SQL · Git",
     desc:"Modelé la base de datos entera de una tienda online y escribí el backend que la consume: catálogo, autenticación y carrito.",
@@ -1042,7 +1111,7 @@ const PROJECTS = [
     ]
   },
   {
-    f:["data"], icon:"🧪", metric:"Pipeline completo dataset → métricas",
+    f:["data"], icon:"🧪", year:"2025", metric:"Pipeline completo dataset → métricas",
     title:"Pipeline de datos y clasificación de imágenes",
     sub:"Python · Google Colab · TensorFlow / Keras",
     desc:"Un flujo de datos de punta a punta: desde el dataset en crudo hasta la evaluación del modelo entrenado en GPU.",
@@ -1055,7 +1124,7 @@ const PROJECTS = [
     ]
   },
   {
-    f:["backend","games"], icon:"⚙️", metric:"Memoria gestionada a mano",
+    f:["backend","games"], icon:"⚙️", year:"2023", metric:"Memoria gestionada a mano",
     title:"Sistema de gestión en C++ con POO",
     sub:"C++ · Programación Orientada a Objetos · Gestión de memoria",
     desc:"Una aplicación de gestión de reservas con arquitectura de clases, reglas de negocio y control manual del ciclo de vida de los objetos.",
@@ -1067,7 +1136,7 @@ const PROJECTS = [
     ]
   },
   {
-    f:["games","data"], icon:"🤖", metric:"90–95 % de tasa de éxito",
+    f:["games","data"], icon:"🤖", year:"2026", metric:"90–95 % de tasa de éxito",
     title:"Agente de aprendizaje por refuerzo en Unity",
     sub:"C# · Python · Unity ML-Agents",
     desc:"Entrené un agente con refuerzo hasta llevarlo del ensayo-error a una tasa de éxito estable del 90–95 %.",
@@ -1088,16 +1157,16 @@ const PITCH = {
 };
 
 const TIMELINE = [
-  {y:"2022", t:"Arranca el Doble Grado", d:"Entro en Ingeniería Informática y Desarrollo de Videojuegos en la Universidad San Jorge (Zaragoza). Fundamentos: algoritmia, C++ y programación orientada a objetos."},
-  {y:"2023", t:"Bases de datos y backend", d:"Modelado relacional, SQL y mi primera plataforma web completa con PHP y MySQL: esquema, consultas, backend y despliegue con Git."},
-  {y:"2024", t:"Datos y machine learning", d:"Python en serio: pandas, NumPy y TensorFlow/Keras en Colab. Preparo mi primer dataset de principio a fin y entreno un clasificador de imágenes en GPU."},
-  {y:"2025", t:"IA aplicada a videojuegos", d:"Unity, C# y ML-Agents. Entreno un agente de aprendizaje por refuerzo y lo llevo hasta un 90–95 % de tasa de éxito rediseñando las recompensas."},
-  {y:"2026", t:"5.º curso · buscando prácticas", d:"Último tramo del doble grado. Busco prácticas como desarrollador de software o ingeniero de datos donde meterme en un equipo y en un repositorio de verdad.", now:true}
+  {y:"2022", t:"Arranca el Doble Grado", d:"Entro en Ingeniería Informática y Desarrollo de Videojuegos en la Universidad San Jorge (Zaragoza). Fundamentos de programación con C: algoritmia, estructuras de control y punteros desde la base."},
+  {y:"2023", t:"Orientación a objetos y C++", d:"Del código estructurado a las clases: herencia, separación de responsabilidades y gestión manual de memoria. Aquí construyo el sistema de gestión de reservas en C++."},
+  {y:"2024", t:"Bases de datos", d:"Modelado relacional en serio: entidades, claves foráneas, normalización de tablas y consultas SQL. La parte que luego sostiene todo lo demás."},
+  {y:"2025", t:"Datos y machine learning", d:"Mi primer pipeline de datos completo en Colab: cargo, limpio y etiqueto un dataset de imágenes y entreno un clasificador con TensorFlow/Keras en GPU."},
+  {y:"2026", t:"5.º curso · e-commerce, IA y prácticas", d:"Dos proyectos grandes el mismo año: la plataforma de venta online con PHP y MySQL, y el agente de aprendizaje por refuerzo en Unity con ML-Agents (90–95 % de éxito). Y buscando prácticas como desarrollador de software o ingeniero de datos.", now:true}
 ];
 
 const BARS = [
-  {n:"Python",v:88,c:""},{n:"SQL",v:85,c:""},{n:"C++",v:80,c:"v"},
-  {n:"C#",v:76,c:"v"},{n:"PHP",v:70,c:"a"},{n:"JavaScript",v:68,c:"a"}
+  {n:"SQL",v:85,c:""},{n:"C++",v:80,c:""},{n:"C#",v:76,c:"v"},
+  {n:"C",v:74,c:"v"},{n:"PHP",v:70,c:"a"},{n:"Python",v:52,c:"a"}
 ];
 
 const LANGS = [
@@ -1125,10 +1194,11 @@ document.getElementById("mq2").innerHTML = mqHTML(MARQUEE_B);
 
 const grid = document.getElementById("grid");
 grid.innerHTML = PROJECTS.map((p,i)=>`
-  <article class="card spot" data-i="${i}" data-f="${p.f.join(" ")}">
+  <article class="card spot" data-i="${i}" data-f="${p.f.join(" ")}" role="button" tabindex="0" aria-label="Ver el detalle de ${p.title}">
+    <i class="brd"></i>
     <div class="card-top">
       <div class="ico">${p.icon}</div>
-      <div class="card-num">0${i+1}</div>
+      <div class="card-num">0${i+1} · <b>${p.year}</b></div>
     </div>
     <div class="metric">◆ ${p.metric}</div>
     <h3>${p.title}</h3>
@@ -1165,6 +1235,22 @@ document.getElementById("langs").innerHTML = LANGS.map(l=>`
 
 document.getElementById("why").innerHTML = WHY.map(w=>`
   <div class="why"><div class="why-ico">${w.i}</div><h4>${w.t}</h4><p>${w.d}</p></div>`).join("");
+
+/* EXTRA 3 · parte los párrafos .lead en palabras para que entren una a una */
+document.querySelectorAll(".lead").forEach(p=>{
+  const words=p.textContent.trim().split(/\s+/);
+  p.innerHTML=words.map((w,i)=>
+    `<span class="w" style="transition-delay:${(.18+i*.022).toFixed(3)}s">${w}</span>`).join(" ");
+});
+
+/* EXTRA 2 · construye el navegador de puntos a partir de las secciones */
+const DOTS=[["perfil","Perfil"],["proyectos","Proyectos"],["trayectoria","Trayectoria"],["skills","Stack"],["porque","Por qué yo"],["contacto","Contacto"]];
+document.getElementById("dots").innerHTML=DOTS
+  .map(([id,l])=>`<button class="nd" data-s="${id}" data-l="${l}" aria-label="${l}"></button>`).join("");
+document.getElementById("dots").addEventListener("click",e=>{
+  const b=e.target.closest(".nd"); if(!b) return;
+  document.getElementById(b.dataset.s).scrollIntoView({behavior:reduce?"auto":"smooth"});
+});
 
 /* stagger: retrasa la entrada de los hijos de cada .stagger */
 document.querySelectorAll(".stagger").forEach(box=>{
@@ -1212,30 +1298,54 @@ document.querySelectorAll("[data-split]").forEach((el,li)=>{
    ============================================================ */
 if(fine && !reduce){
   const cur=document.getElementById("cur"), dot=document.getElementById("curDot");
+  const spotEl=document.getElementById("spot");
   let tx=innerWidth/2, ty=innerHeight/2, cx=tx, cy=ty;
   document.body.classList.add("has-cursor");
+
+  /* EXTRA 5 · estela: 7 puntitos que siguen al cursor con retardo creciente */
+  const TRAIL=7;
+  const trail=Array.from({length:TRAIL},(_,i)=>{
+    const d=document.createElement("div");
+    d.className="trail";
+    d.style.opacity=(.42-i*.05).toFixed(2);
+    d.style.transform="scale("+(1-i*.11).toFixed(2)+")";
+    document.body.appendChild(d);
+    return {el:d,x:tx,y:ty};
+  });
+
   addEventListener("mousemove",e=>{
     tx=e.clientX; ty=e.clientY;
     dot.style.transform=`translate(${tx}px,${ty}px)`;
     const hot=e.target.closest("a,button,.card,.chip,.pill,.stat,.soc,.contact-line,input,textarea");
     cur.classList.toggle("hot",!!hot);
+    /* EXTRA 4 · el foco del fondo sigue al ratón */
+    spotEl.style.setProperty("--sx",tx+"px");
+    spotEl.style.setProperty("--sy",ty+"px");
   });
   addEventListener("mousedown",()=>cur.classList.add("down"));
   addEventListener("mouseup",()=>cur.classList.remove("down"));
+
   (function loop(){
     cx+=(tx-cx)*.16; cy+=(ty-cy)*.16;
     cur.style.transform=`translate(${cx}px,${cy}px)`;
+    let px=tx, py=ty;
+    trail.forEach((t,i)=>{
+      t.x+=(px-t.x)*(.34-i*.03); t.y+=(py-t.y)*(.34-i*.03);
+      t.el.style.transform=`translate(${t.x}px,${t.y}px) scale(${(1-i*.11).toFixed(2)})`;
+      px=t.x; py=t.y;
+    });
     requestAnimationFrame(loop);
   })();
 }else{
   document.getElementById("cur").remove();
   document.getElementById("curDot").remove();
+  document.getElementById("spot").remove();
 }
 
 /* ============================================================
    TYPER
    ============================================================ */
-const WORDS=["bases de datos que aguantan.","backend en Python y C++.","modelos que aprenden solos.","agentes con ML-Agents.","pipelines de datos completos."];
+const WORDS=["bases de datos que aguantan.","backend en PHP y C++.","sistemas en C y C++.","agentes con ML-Agents.","pipelines de datos completos."];
 (function typer(){
   const el=document.getElementById("typer");
   if(reduce){ el.textContent=WORDS[0]; return; }
@@ -1282,7 +1392,15 @@ const fab=document.getElementById("top-fab"), rp=fab.querySelector(".rp");
 const badges=[...document.querySelectorAll("[data-par]")];
 const tlBox=document.getElementById("tl"), tlFill=document.getElementById("tlFill");
 const tlItems=[...document.querySelectorAll(".tl-item")];
-let lastY=0, ticking=false;
+const dots=[...document.querySelectorAll(".nd")], dotsBox=document.getElementById("dots");
+const heroCol=document.getElementById("heroCol"), heroImg=document.querySelector(".portrait-box");
+const tracks=[...document.querySelectorAll(".marquee-track")];
+let lastY=0, ticking=false, vel=0, skewTimer=0;
+
+/* transición suave del skew de las marquesinas */
+function setSkew(v){
+  tracks.forEach(t=>t.style.setProperty("--sk",v.toFixed(2)+"deg"));
+}
 
 function movePill(a){
   if(innerWidth<=900 || !a){ pill.style.opacity=0; return; }
@@ -1313,8 +1431,35 @@ function frame(){
     if(on) movePill(a);
   });
 
+  // EXTRA 2 · punto activo del navegador lateral
+  dotsBox.classList.toggle("on", y>420);
+  dots.forEach(d=>d.classList.toggle("on", d.dataset.s===cur));
+
   // parallax de los badges del hero
   if(y<innerHeight*1.3) badges.forEach(b=>b.style.setProperty("--py",(y*+b.dataset.par).toFixed(1)+"px"));
+
+  // EXTRA 6 · el hero se desvanece y se aleja al salir de pantalla.
+  // Solo en escritorio: en móvil el hero es más alto que la ventana y se
+  // borraría mientras todavía se está leyendo.
+  if(!reduce && innerWidth>940){
+    if(y<innerHeight){
+      const k=y/innerHeight;
+      heroCol.style.opacity = 1-k*1.15;
+      heroCol.style.transform = `translateY(${k*70}px)`;
+      heroImg.style.opacity = 1-k*.9;
+      heroImg.style.transform = `translateY(${k*40}px) scale(${1-k*.08})`;
+    }
+  }else if(heroCol.style.opacity){
+    heroCol.style.cssText=""; heroImg.style.cssText="";
+  }
+
+  // EXTRA 7 · las marquesinas se inclinan con la velocidad del scroll
+  if(!reduce){
+    vel += ((y-lastY) - vel)*.25;
+    setSkew(Math.max(-8,Math.min(8,vel*.24)));
+    clearTimeout(skewTimer);
+    skewTimer=setTimeout(()=>{ vel=0; setSkew(0); },150);
+  }
 
   // línea de la trayectoria que se dibuja
   if(tlBox){
@@ -1398,6 +1543,33 @@ if(!reduce && fine){
     });
     b.addEventListener("mouseleave",()=>b.style.transform="");
   });
+
+  /* EXTRA 8 · inclinación 3D también en las tarjetas de "por qué yo" y las stats */
+  document.querySelectorAll(".why,.stat").forEach(el=>{
+    el.addEventListener("mousemove",e=>{
+      const r=el.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width-.5, py=(e.clientY-r.top)/r.height-.5;
+      el.style.transform=`perspective(800px) rotateX(${-py*8}deg) rotateY(${px*8}deg) translateY(-7px)`;
+    });
+    el.addEventListener("mouseleave",()=>el.style.transform="");
+  });
+
+  /* EXTRA 9 · las pills se apartan del cursor como un campo magnético */
+  document.querySelectorAll(".pill-grid").forEach(box=>{
+    const pills=[...box.querySelectorAll(".pill")];
+    box.addEventListener("mousemove",e=>{
+      pills.forEach(p=>{
+        const r=p.getBoundingClientRect();
+        const dx=(r.left+r.width/2)-e.clientX, dy=(r.top+r.height/2)-e.clientY;
+        const d=Math.hypot(dx,dy);
+        if(d<110){
+          const f=(1-d/110)*16;
+          p.style.transform=`translate(${(dx/d*f).toFixed(1)}px,${(dy/d*f).toFixed(1)}px)`;
+        }else p.style.transform="";
+      });
+    });
+    box.addEventListener("mouseleave",()=>pills.forEach(p=>p.style.transform=""));
+  });
 }
 
 /* onda al pulsar cualquier botón */
@@ -1437,11 +1609,16 @@ document.getElementById("chips").addEventListener("click",e=>{
    MODAL
    ============================================================ */
 const modal=document.getElementById("modal");
+grid.addEventListener("keydown",e=>{
+  if(e.key!=="Enter" && e.key!==" ") return;
+  const card=e.target.closest(".card"); if(!card) return;
+  e.preventDefault(); card.click();
+});
 grid.addEventListener("click",e=>{
   const card=e.target.closest(".card"); if(!card) return;
   const p=PROJECTS[+card.dataset.i];
   document.getElementById("mTitle").textContent=p.title;
-  document.getElementById("mSub").textContent=p.sub;
+  document.getElementById("mSub").textContent=p.year+" · "+p.sub;
   document.getElementById("mTags").innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join("");
   document.getElementById("mList").innerHTML=p.points
     .map((x,i)=>`<li style="transition-delay:${.12+i*.09}s"><span>${x}</span></li>`).join("");

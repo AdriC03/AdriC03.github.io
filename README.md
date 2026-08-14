@@ -29,12 +29,13 @@ git add . && git commit -m "Actualiza el portfolio" && git push
 
 Todo lo editable está en constantes al principio del `<script>`:
 
-- `PROJECTS` — los cuatro proyectos y el detalle que sale en la ventana modal.
-- `TIMELINE` — la trayectoria 2022 → 2026. Reparte los temas por curso
-  (2022 fundamentos, 2023 bases de datos, 2024 datos/ML, 2025 Unity+RL); si el
-  orden real fue otro, cámbialo ahí.
-- `BARS` — los porcentajes de los lenguajes. Son una estimación a partir del CV;
-  ajústalos a lo que consideres justo.
+- `PROJECTS` — los cuatro proyectos, su año y el detalle que sale en la ventana
+  modal. El año del sistema en C++ está puesto en 2023 a ojo; los otros tres son
+  los que confirmaste (imágenes 2025, e-commerce 2026, agente RL 2026).
+- `TIMELINE` — la trayectoria 2022 → 2026: fundamentos con C, POO y C++, bases de
+  datos, datos/ML y el último curso con los dos proyectos grandes.
+- `BARS` — los porcentajes de los lenguajes. Son una estimación; ajústalos a lo
+  que consideres justo antes de una entrevista, porque te van a preguntar por ellos.
 - `WHY`, `PITCH`, `LANGS`, `MARQUEE_A/B` — el resto de textos.
 - `LINKEDIN`, `GITHUB`, `EMAIL` — los enlaces de contacto.
 
@@ -57,6 +58,15 @@ Todo lo editable está en constantes al principio del `<script>`:
   nav que se esconde al bajar y botón flotante con anillo de progreso.
 - **Botones**: efecto magnético y onda al pulsar.
 - **Formulario**: confeti al enviar.
+- **Estela del cursor** (siete puntos con retardo creciente) y un foco de luz de
+  fondo que sigue al ratón.
+- **Navegador lateral de puntos** con el nombre de cada sección al pasar por encima.
+- **Párrafos que entran palabra a palabra** al llegar a pantalla.
+- **Borde de luz giratorio** alrededor de la tarjeta de proyecto que señalas.
+- **El hero se desvanece y se aleja** al salir de pantalla (solo en escritorio).
+- **Las marquesinas se inclinan** según la velocidad a la que haces scroll.
+- **Inclinación 3D** también en las tarjetas de "por qué yo" y en las métricas.
+- **Las pills del stack se apartan** del cursor como un campo magnético.
 - Todo respeta `prefers-reduced-motion`: si el sistema lo pide, se desactiva.
 
 ## Detalles técnicos
